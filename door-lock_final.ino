@@ -15,6 +15,7 @@ RTC_DS1307 rtc;
 char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 int relay=15;
 void setup() {
+  // ------- RTC------
   Serial.begin(115200);
   pinMode(2,OUTPUT);
   digitalWrite(relay,HIGH);
@@ -26,17 +27,18 @@ void setup() {
  rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
   //rtc.adjust(DateTime(2019, 8, 23, 2, 32, 00));
 
-
-  SPI.begin();      // Initiate  SPI bus
-  mfrc522.PCD_Init();   // Initiate MFRC522
-  Serial.println("take your card to the reader...");
-
+  //---------EEPROM---------
   if (!EEPROM.begin(64000)) {
     Serial.println("Failed to initialise EEPROM");
     Serial.println("Restarting...");
     delay(1000);
     ESP.restart();
   }
+  
+  //--------RFID-----------
+  SPI.begin();      // Initiate  SPI bus
+  mfrc522.PCD_Init();   // Initiate MFRC522
+  Serial.println("take your card to the reader...");
 
 }
 
@@ -57,10 +59,10 @@ void loop() {
   byte letter;
   for (byte i = 0; i < mfrc522.uid.size; i++) 
   {
-     Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
-     Serial.print(mfrc522.uid.uidByte[i], HEX);
-     content.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
-     content.concat(String(mfrc522.uid.uidByte[i], HEX));
+    content.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
+    content.concat(String(mfrc522.uid.uidByte[i], HEX));
+    Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
+    Serial.print(mfrc522.uid.uidByte[i], HEX);
   }
   Serial.println();
   Serial.print("Message : ");
